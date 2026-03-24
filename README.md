@@ -16,11 +16,27 @@
 1. [Wprowadzenie](#rozdział-1-wprowadzenie)
    1. [Kubernetes](#kubernetes)
    2. [Grafana](#grafana)
+   3. [MCP](#mcp)
 2. [Podstawy teoretyczne i stos technologiczny](#rozdział-2-podstawy-teoretyczne-i-stos-technologiczny)
 3. [Opis studium przypadku](#rozdział-3-opis-studium-przypadku)
 4. [Architektura rozwiązania](#rozdział-4-architektura-rozwiązania)
+5. [Konfiguracja środowiska](#rozdział-5-konfiguracja-środowiska)
+6. [Sposób instalacji](#rozdział-6-sposób-instalacji)
+7. [Etapy wdrażania demo](#rozdział-7-etapy-wdrażania-demo)
+   1. [Konfiguracja](#konfiguracja)
+   2. [Przygotowanie danych](#przygotowanie-danych)
+8. [Opis demo](#rozdział-8-opis-demo)
+   1. [Procedura wykonania](#procedura-wykonania)
+   2. [Wyniki](#wyniki)
+9. [Podsumowanie i wnioski](#rozdział-9-podsumowanie-i-wnioski)
+10. [Referencje](#rozdział-10-referencje)
 
 ## Rozdział 1: Wprowadzenie
+
+Celem tego projektu jest demonstracja wykorzystania serwera MCP dla Grafany do sterowania aplikacją
+Grafany z poziomu wybranego modelu LLM.
+Aplikacja demonstracyjna powinna zostać wdrożona w klastrze Kubernetesa w celu generowania danych
+wizualizowanych przez Grafanę.
 
 ### Kubernetes
 
@@ -66,6 +82,20 @@ Kluczowe cechy i zastosowania Grafany obejmują:
 - alerty - powiadomienia dotyczące m.in. anomalii czy przekroczeniu ustalonych progów,
 - elastyczność - możliwość działania na serwerach lokalnych oraz w chmurze, rozbudowa przez wtyczki.
 
+### MCP
+
+MCP, czyli _Model Context Protocol_, to otwarty standard technologiczny, który umożliwia modelom LLM
+łączyć się w bezpieczny sposób z zewnętrznymi danymi, bazami danych oraz narzędziami programistycznymi.
+Dzięki temu zyskał dużą popularność, bo rozwiązał kluczowy problem braku standaryzacji w łączeniu
+modeli z zewnętrznymi danymi i narzędziami.
+Ułatwia zarządzanie uprawnieniami dzięki ustrukturyzowanemu dostępowi do danych.
+MCP działa w modelu klient-serwer.
+Serwer udostępnia zasoby (dane), narzędzia oraz prompty, które pełnią rolę reużywalnych szablonów,
+instrukcji, z kolei klienci odkrywają i wykorzystują te elementy udostępniane przez serwery.
+Każdy klient utrzymuje połączenie 1:1 z poszczególnym serwerem.
+Całość jest zarządzana przez _hosta_, który pełni rolę koordynatora - tworzy i obsługuje wiele
+instancji klienta.
+
 ## Rozdział 2: Podstawy teoretyczne i stos technologiczny
 
 ## Rozdział 3: Opis studium przypadku
@@ -73,3 +103,23 @@ Kluczowe cechy i zastosowania Grafany obejmują:
 ## Rozdział 4: Architektura rozwiązania
 
 ![Diagram architektury rozwiązania](/images/architecture.svg)
+
+## Rozdział 5: Konfiguracja środowiska
+
+## Rozdział 6: Sposób instalacji
+
+## Rozdział 7: Etapy wdrażania demo
+
+### Konfiguracja
+
+### Przygotowanie danych
+
+## Rozdział 8: Opis demo
+
+### Procedura wykonania
+
+### Wyniki
+
+## Rozdział 9: Podsumowanie i wnioski
+
+## Rozdział 10: Referencje
