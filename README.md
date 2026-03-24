@@ -3,6 +3,7 @@
 ## Temat projektu: MCP Grafana (akronim MCP-G)
 
 ## Autorzy:
+
 - Mateusz Górski
 - Mateusz Lampert
 - Wojciech Michaluk
@@ -11,11 +12,14 @@
 ## Rok 2025/26, grupa 5 - piątek 13:15
 
 ## Spis treści
+
 1. [Wprowadzenie](#rozdział-1-wprowadzenie)
    1. [Kubernetes](#kubernetes)
    2. [Grafana](#grafana)
    3. [MCP](#mcp)
 2. [Podstawy teoretyczne i stos technologiczny](#rozdział-2-podstawy-teoretyczne-i-stos-technologiczny)
+   1. [Podstawy teoretyczne](#21-podstawy-teoretyczne)
+   2. [Stos technologiczny](#22-stos-technologiczny)
 3. [Opis studium przypadku](#rozdział-3-opis-studium-przypadku)
 4. [Architektura rozwiązania](#rozdział-4-architektura-rozwiązania)
 5. [Konfiguracja środowiska](#rozdział-5-konfiguracja-środowiska)
@@ -45,17 +49,18 @@ rozproszonymi.
 System ten pozwala na uruchamianie i zarządzanie setkami, a nawet tysiącami kontenerów.
 Kubernetes cechuje się również samonaprawianiem (self-healing), czyli automatycznym restartem
 wadliwych kontenerów, które uległy awarii, ewentualnie nawet ich wymianą w razie potrzeby.
-Jego działanie opiera się na organizacji kontenerów w tzw. *pody*, czyli logiczne grupy, co ułatwia
+Jego działanie opiera się na organizacji kontenerów w tzw. _pody_, czyli logiczne grupy, co ułatwia
 zarządzanie aplikacją.
 
 Warto wspomnieć, czym Kubernetes **nie jest**, aby dostrzec pełnię jego zalet.
-Nie jest to tradycyjny, "zawierający wszystko" system *Platform as a Service* (PaaS), ale posiada
+Nie jest to tradycyjny, "zawierający wszystko" system _Platform as a Service_ (PaaS), ale posiada
 funkcjonalności ogólnego zastosowania, które cechują rozwiązania tego typu.
-Obejmują one instalacje (*deployments*), a także skalowanie i balansowanie ruchu, co umożliwia
+Obejmują one instalacje (_deployments_), a także skalowanie i balansowanie ruchu, co umożliwia
 użytkownikom integrację rozwiązań służących do logowania, monitoringu i ostrzegania.
 Kubernetes również **nie jest monolitem** - dostarcza elementy, z których można zbudować aplikację,
 ale są one opcjonalne i funkcjonują na zasadzie wtyczek.
 Pozostawia to użytkownikowi wybór i elastyczność, bowiem Kubernetes:
+
 - nie ogranicza obsługiwanych typów aplikacji,
 - nie wymusza użycia konkretnych systemów zbierania logów, monitorowania ani ostrzegania,
 - eliminuje konieczność orchestracji i scentralizowanego zarządzania.
@@ -71,8 +76,9 @@ baz danych i rozwiązań chmurowych.
 ![Widok wyboru źródła danych](./images/grafana_data_sources.png)
 
 Kluczowe cechy i zastosowania Grafany obejmują:
+
 - wizualizację złożonych danych z wykorzystaniem szerokiej gamy wykresów (np. słupkowe, liniowe,
-*heatmapy*),
+  _heatmapy_),
 - wsparcie dla wielu źródeł danych (patrz rysunek powyżej),
 - monitorowanie w czasie rzeczywistym - np. śledzenie wydajności serwerów, aplikacji i usług,
 - alerty - powiadomienia dotyczące m.in. anomalii czy przekroczeniu ustalonych progów,
@@ -93,6 +99,83 @@ Całość jest zarządzana przez _hosta_, który pełni rolę koordynatora - two
 instancji klienta.
 
 ## Rozdział 2: Podstawy teoretyczne i stos technologiczny
+
+### 2.1 Podstawy teoretyczne
+
+#### Monitorowanie i obserwowalność
+
+Monitorowanie aplikacji w środowiskach chmurowych polega na zbieraniu i analizie danych
+telemetrycznych. Kluczowym pojęciem jest tutaj _obserwowalność_ (ang. _observability_), czyli
+zdolność do wnioskowania o wewnętrznym stanie systemu na podstawie jego zewnętrznych sygnałów.
+Wyróżnia się trzy filary obserwowalności:
+
+- **metrics** - numeryczne wartości reprezentujące stan systemu w czasie (np. użycie CPU,
+  liczba żądań na sekundę, opóźnienie odpowiedzi),
+- **logs** - tekstowe zapisy zdarzeń generowane przez aplikacje,
+- **traces** - rejestracja przepływu żądań przez poszczególne komponenty systemu.
+
+W projekcie skupiamy się przede wszystkim na metrykach zbieranych przez Prometheusa
+i wizualizowanych w Grafanie.
+
+#### Integracja LLM z Grafaną przez MCP
+
+Dedykowany serwer MCP umożliwia modelowi językowemu sterowanie Grafaną —
+przeglądanie dashboardów, odpytywanie źródeł danych czy tworzenie alertów.
+Przepływ komunikacji wygląda następująco:
+
+1. Użytkownik wysyła zapytanie w języku naturalnym do modelu LLM.
+2. Model rozpoznaje intencję i wywołuje odpowiednie narzędzie udostępniane przez serwer MCP.
+3. Serwer MCP Grafany wykonuje operację (np. odpytuje Prometheusa) i zwraca wynik.
+4. Model LLM interpretuje wynik i odpowiada użytkownikowi w języku naturalnym.
+
+### 2.2 Stos technologiczny
+
+Poniżej opisano narzędzia wykorzystane w projekcie. Kubernetes, Grafana oraz MCP zostały
+przedstawione w rozdziale 1.
+
+#### Google Cloud Platform (GCP)
+
+Infrastruktura chmurowa projektu opiera się na platformie Google Cloud Platform.
+W ramach projektu wykorzystamy bezpłatne środki w wysokości 300 USD oferowane przez Google nowym użytkownikom.
+GCP zapewnia klaster Kubernetes poprzez usługę Google Kubernetes Engine (GKE), która automatyzuje
+zarządzanie węzłami klastra, aktualizacje oraz skalowanie.
+
+#### Docker
+
+Docker jest podstawą konteneryzacji wszystkich komponentów systemu.
+Mikroserwisy aplikacji oraz narzędzia monitoringowe pakowane są jako obrazy
+kontenerowe zgodne ze standardem OCI.
+Kubernetes zarządza następnie cyklem życia tych kontenerów w klastrze.
+
+#### Prometheus
+
+Prometheus to otwartoźródłowy system monitorowania i alarmowania, stanowiący standard
+w ekosystemie Kubernetes.
+Działa w modelu _pull_ - cyklicznie pobiera (_scrape_) metryki z endpointów HTTP udostępnianych przez
+monitorowane aplikacje.
+Zebrane metryki przechowuje w wbudowanej bazie danych szeregów czasowych i udostępnia je
+poprzez język zapytań PromQL.
+W projekcie Prometheus zbiera metryki ze wszystkich mikroserwisów aplikacji.
+
+#### Serwer MCP Grafany
+
+Serwer MCP Grafany to osobny projekt otwartoźródłowy, który łączy się z Grafaną przez jej HTTP API.
+Udostępnia narzędzia pozwalające modelom LLM na sterowanie Grafaną — odpytywanie źródeł danych,
+zarządzanie dashboardami czy analizę metryk.
+
+#### OpenAI GPT-4o
+
+GPT-4o to model językowy firmy OpenAI wykorzystywany w projekcie do komunikacji z Grafaną
+przez protokół MCP. Interpretuje dane monitoringowe i odpowiada użytkownikowi w języku naturalnym.
+Wybór dostawcy i modelu może ulec zmianie w trakcie realizacji projektu.
+
+#### Locust
+
+Locust to otwartoźródłowe narzędzie do testów obciążeniowych napisane w języku Python.
+Pozwala na symulowanie zachowania wielu równoczesnych użytkowników wysyłających żądania HTTP
+do testowanej aplikacji.
+W projekcie Locust generuje syntetyczny ruch użytkowników, który umożliwia obserwację
+zachowania systemu pod obciążeniem w Grafanie.
 
 ## Rozdział 3: Opis studium przypadku
 
