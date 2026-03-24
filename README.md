@@ -3,6 +3,7 @@
 ## Temat projektu: MCP Grafana (akronim MCP-G)
 
 ## Autorzy:
+
 - Mateusz Górski
 - Mateusz Lampert
 - Wojciech Michaluk
@@ -11,6 +12,7 @@
 ## Rok 2025/26, grupa 5 - piątek 13:15
 
 ## Spis treści
+
 1. [Wprowadzenie](#rozdział-1-wprowadzenie)
    1. [Kubernetes](#kubernetes)
    2. [Grafana](#grafana)
@@ -29,17 +31,18 @@ rozproszonymi.
 System ten pozwala na uruchamianie i zarządzanie setkami, a nawet tysiącami kontenerów.
 Kubernetes cechuje się również samonaprawianiem (self-healing), czyli automatycznym restartem
 wadliwych kontenerów, które uległy awarii, ewentualnie nawet ich wymianą w razie potrzeby.
-Jego działanie opiera się na organizacji kontenerów w tzw. *pody*, czyli logiczne grupy, co ułatwia
+Jego działanie opiera się na organizacji kontenerów w tzw. _pody_, czyli logiczne grupy, co ułatwia
 zarządzanie aplikacją.
 
 Warto wspomnieć, czym Kubernetes **nie jest**, aby dostrzec pełnię jego zalet.
-Nie jest to tradycyjny, "zawierający wszystko" system *Platform as a Service* (PaaS), ale posiada
+Nie jest to tradycyjny, "zawierający wszystko" system _Platform as a Service_ (PaaS), ale posiada
 funkcjonalności ogólnego zastosowania, które cechują rozwiązania tego typu.
-Obejmują one instalacje (*deployments*), a także skalowanie i balansowanie ruchu, co umożliwia
+Obejmują one instalacje (_deployments_), a także skalowanie i balansowanie ruchu, co umożliwia
 użytkownikom integrację rozwiązań służących do logowania, monitoringu i ostrzegania.
 Kubernetes również **nie jest monolitem** - dostarcza elementy, z których można zbudować aplikację,
 ale są one opcjonalne i funkcjonują na zasadzie wtyczek.
 Pozostawia to użytkownikowi wybór i elastyczność, bowiem Kubernetes:
+
 - nie ogranicza obsługiwanych typów aplikacji,
 - nie wymusza użycia konkretnych systemów zbierania logów, monitorowania ani ostrzegania,
 - eliminuje konieczność orchestracji i scentralizowanego zarządzania.
@@ -55,8 +58,9 @@ baz danych i rozwiązań chmurowych.
 ![Widok wyboru źródła danych](./images/grafana_data_sources.png)
 
 Kluczowe cechy i zastosowania Grafany obejmują:
+
 - wizualizację złożonych danych z wykorzystaniem szerokiej gamy wykresów (np. słupkowe, liniowe,
-*heatmapy*),
+  _heatmapy_),
 - wsparcie dla wielu źródeł danych (patrz rysunek powyżej),
 - monitorowanie w czasie rzeczywistym - np. śledzenie wydajności serwerów, aplikacji i usług,
 - alerty - powiadomienia dotyczące m.in. anomalii czy przekroczeniu ustalonych progów,
@@ -67,3 +71,5 @@ Kluczowe cechy i zastosowania Grafany obejmują:
 ## Rozdział 3: Opis studium przypadku
 
 ## Rozdział 4: Architektura rozwiązania
+
+![Diagram architektury rozwiązania](/images/architecture.svg)
