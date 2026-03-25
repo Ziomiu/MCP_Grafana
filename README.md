@@ -128,7 +128,7 @@ W ramach prezentacji działania systemu przewidziano następujące scenariusze t
     - dalsze generowanie ruchu
 
 5. Skalowanie aplikacji
-    - zwiększenie ruchu przy włączonym autoscalingu w Kubernetes
+    - zwiększenie ruchu przy włączonym autoscalingu w Kubernetesie
 
 Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, które będą zbierane przez Prometheusa oraz wizualizowane w Grafanie.
 
