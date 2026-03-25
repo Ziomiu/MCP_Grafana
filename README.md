@@ -18,8 +18,16 @@
    2. [Grafana](#grafana)
    3. [MCP](#mcp)
 2. [Podstawy teoretyczne i stos technologiczny](#rozdział-2-podstawy-teoretyczne-i-stos-technologiczny)
-   1. [Podstawy teoretyczne](#21-podstawy-teoretyczne)
-   2. [Stos technologiczny](#22-stos-technologiczny)
+   1. [Podstawy teoretyczne](#podstawy-teoretyczne)
+      1. [Monitorowanie i obserwowalność](#monitorowanie-i-obserwowalność)
+      2. [Integracja LLM z Grafaną przez MCP](#integracja-llm-z-grafaną-przez-mcp)
+   2. [Stos technologiczny](#stos-technologiczny)
+      1. [Google Cloud Platform (GCP)](#google-cloud-platform-gcp)
+      2. [Docker](#docker)
+      3. [Prometheus](#prometheus)
+      4. [Serwer MCP Grafany](#serwer-mcp-grafany)
+      5. [OpenAI GPT-4o](#openai-gpt-4o)
+      6. [Locust](#locust)
 3. [Opis studium przypadku](#rozdział-3-opis-studium-przypadku)
    1. [Wykorzystana aplikacja](#wykorzystana-aplikacja)
    2. [Komponenty aplikacji](#komponenty-aplikacji)
@@ -103,7 +111,7 @@ instancji klienta.
 
 ## Rozdział 2: Podstawy teoretyczne i stos technologiczny
 
-### 2.1 Podstawy teoretyczne
+### Podstawy teoretyczne
 
 #### Monitorowanie i obserwowalność
 
@@ -131,7 +139,7 @@ Przepływ komunikacji wygląda następująco:
 3. Serwer MCP Grafany wykonuje operację (np. odpytuje Prometheusa) i zwraca wynik.
 4. Model LLM interpretuje wynik i odpowiada użytkownikowi w języku naturalnym.
 
-### 2.2 Stos technologiczny
+### Stos technologiczny
 
 Poniżej opisano narzędzia wykorzystane w projekcie. Kubernetes, Grafana oraz MCP zostały
 przedstawione w rozdziale 1.
