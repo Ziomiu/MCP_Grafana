@@ -164,7 +164,7 @@ Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, któr
 
 ## Rozdział 4: Architektura rozwiązania
 
-![Diagram architektury rozwiązania](/images/architecture.svg)
+![Diagram architektury rozwiązania](/images/project_architecture.svg)
 
 ## Rozdział 5: Konfiguracja środowiska
 
