@@ -19,6 +19,9 @@
    3. [MCP](#mcp)
 2. [Podstawy teoretyczne i stos technologiczny](#rozdział-2-podstawy-teoretyczne-i-stos-technologiczny)
 3. [Opis studium przypadku](#rozdział-3-opis-studium-przypadku)
+   1. [Wykorzystana aplikacja](#wykorzystana-aplikacja)
+   2. [Komponenty aplikacji](#komponenty-aplikacji)
+   3. [Scenariusze testowania aplikacji](#scenariusze-testowania-aplikacji)
 4. [Architektura rozwiązania](#rozdział-4-architektura-rozwiązania)
 5. [Konfiguracja środowiska](#rozdział-5-konfiguracja-środowiska)
 6. [Sposób instalacji](#rozdział-6-sposób-instalacji)
@@ -99,6 +102,65 @@ instancji klienta.
 ## Rozdział 2: Podstawy teoretyczne i stos technologiczny
 
 ## Rozdział 3: Opis studium przypadku
+
+### Wykorzystana aplikacja
+
+Aplikacją wykorzystaną w niniejszym projekcie jest Bank of Anthos, czyli referencyjna aplikacja mikroserwisowa opracowana
+przez Google, służąca do demonstracji praktyk związanych z wdrażaniem, monitorowaniem oraz analizą aplikacji w
+środowiskach chmurowych.
+Bank of Anthos symuluje działanie systemu bankowego, umożliwiając użytkownikom wykonywanie podstawowych operacji
+finansowych, takich jak przeglądanie salda konta, wykonywanie przelewów i zarządzanie historią transakcji.
+
+| Login                      | Strona główna                                 |
+|----------------------------|-----------------------------------------------|
+| ![Login](images/login.png) | ![User Transactions](images/transactions.png) |
+
+Aplikacja działa w środowisku Kubernetes i jest uruchamiana jako zestaw kontenerów,
+a cały projekt został zaprojektowany w architekturze mikroserwisowej i składa się z wielu niezależnych komponentów
+widocznych poniżej:
+
+![Architecture Diagram](images/demo_architecture.png)
+
+### Komponenty aplikacji
+
+| Serwis              | Język           | Opis                                                                                                         |
+|---------------------|-----------------|--------------------------------------------------------------------------------------------------------------|
+| loadgenerator       | Python / Locust | Generuje ruch w systemie, symulując zachowanie użytkowników (tworzenie kont, wykonywanie transakcji).        |
+| frontend            | Python          | Udostępnia serwer HTTP obsługujący interfejs użytkownika (strona logowania, rejestracji oraz strona główna). |
+| user-service        | Python          | Zarządza kontami użytkowników oraz uwierzytelnianiem. Generuje tokeny JWT wykorzystywane przez inne serwisy. |
+| contacts            | Python          | Przechowuje listę kontaktów użytkownika wykorzystywaną np. przy wykonywaniu przelewów.                       |
+| accounts-db         | PostgreSQL      | Baza danych przechowująca dane użytkowników. Może być wstępnie zasilona danymi demonstracyjnymi.             |
+| ledger-writer       | Java            | Przyjmuje i waliduje transakcje, a następnie zapisuje je w rejestrze (ledger).                               |
+| balance-reader      | Java            | Zapewnia szybki dostęp do aktualnych sald użytkowników na podstawie danych z bazy ledger-db.                 |
+| transaction-history | Java            | Udostępnia historię transakcji użytkownika na podstawie danych z bazy ledger-db.                             |
+| ledger-db           | PostgreSQL      | Baza danych przechowująca wszystkie transakcje (ledger). Może być wstępnie zasilona danymi demonstracyjnymi. |
+
+---
+
+### Scenariusze testowania aplikacji
+
+W ramach prezentacji działania systemu przewidziano następujące scenariusze testowe dla aplikacji:
+
+1. Normalne działanie aplikacji
+    - niski poziom ruchu
+    - standardowe operacje użytkownika
+
+2. Zwiększone obciążenie
+    - stopniowe zwiększanie liczby użytkowników
+    - intensyfikacja wykonywanych operacji
+
+3. Przeciążenie systemu
+    - nagłe zwiększenie liczby użytkowników,
+    - bardzo intensywne obciążenie wszystkich serwisów.
+
+4. Awaria komponentu
+    - wyłączenie jednego z kluczowych serwisów
+    - dalsze generowanie ruchu
+
+5. Skalowanie aplikacji
+    - zwiększenie ruchu przy włączonym autoscalingu w Kubernetesie
+
+Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, które będą zbierane przez Prometheusa oraz wizualizowane w Grafanie.
 
 ## Rozdział 4: Architektura rozwiązania
 
