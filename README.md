@@ -14,8 +14,8 @@
 ## Spis treści
 
 1. [Wprowadzenie](#rozdział-1-wprowadzenie)
-    1. [Kubernetes](#kubernetes)
-    2. [Grafana](#grafana)
+   1. [Kubernetes](#kubernetes)
+   2. [Grafana](#grafana)
 2. [Podstawy teoretyczne i stos technologiczny](#rozdział-2-podstawy-teoretyczne-i-stos-technologiczny)
 3. [Opis studium przypadku](#rozdział-3-opis-studium-przypadku)
    1. [Wykorzystana aplikacja](#wykorzystana-aplikacja)
@@ -75,7 +75,7 @@ Kluczowe cechy i zastosowania Grafany obejmują:
 
 ### Wykorzystana aplikacja
 
-Aplikacją wykorzystaną w niniejszym projekcie jest Bank of Anthos czyli referencyjna aplikacja mikroserwisowa opracowana
+Aplikacją wykorzystaną w niniejszym projekcie jest Bank of Anthos, czyli referencyjna aplikacja mikroserwisowa opracowana
 przez Google, służąca do demonstracji praktyk związanych z wdrażaniem, monitorowaniem oraz analizą aplikacji w
 środowiskach chmurowych.
 Bank of Anthos symuluje działanie systemu bankowego, umożliwiając użytkownikom wykonywanie podstawowych operacji
@@ -86,7 +86,7 @@ finansowych, takich jak przeglądanie salda konta, wykonywanie przelewów i zarz
 | ![Login](images/login.png) | ![User Transactions](images/transactions.png) |
 
 Aplikacja działa w środowisku Kubernetes i jest uruchamiana jako zestaw kontenerów,
-a cały projekt została zaprojektowana w architekturze mikroserwisowej i składa się z wielu niezależnych komponentów
+a cały projekt został zaprojektowany w architekturze mikroserwisowej i składa się z wielu niezależnych komponentów
 widocznych poniżej:
 
 ![Architecture Diagram](images/architecture.png)
@@ -95,15 +95,15 @@ widocznych poniżej:
 
 | Serwis              | Język           | Opis                                                                                                         |
 |---------------------|-----------------|--------------------------------------------------------------------------------------------------------------|
+| loadgenerator       | Python / Locust | Generuje ruch w systemie, symulując zachowanie użytkowników (tworzenie kont, wykonywanie transakcji).        |
 | frontend            | Python          | Udostępnia serwer HTTP obsługujący interfejs użytkownika (strona logowania, rejestracji oraz strona główna). |
+| user-service        | Python          | Zarządza kontami użytkowników oraz uwierzytelnianiem. Generuje tokeny JWT wykorzystywane przez inne serwisy. |
+| contacts            | Python          | Przechowuje listę kontaktów użytkownika wykorzystywaną np. przy wykonywaniu przelewów.                       |
+| accounts-db         | PostgreSQL      | Baza danych przechowująca dane użytkowników. Może być wstępnie zasilona danymi demonstracyjnymi.             |
 | ledger-writer       | Java            | Przyjmuje i waliduje transakcje, a następnie zapisuje je w rejestrze (ledger).                               |
 | balance-reader      | Java            | Zapewnia szybki dostęp do aktualnych sald użytkowników na podstawie danych z bazy ledger-db.                 |
 | transaction-history | Java            | Udostępnia historię transakcji użytkownika na podstawie danych z bazy ledger-db.                             |
 | ledger-db           | PostgreSQL      | Baza danych przechowująca wszystkie transakcje (ledger). Może być wstępnie zasilona danymi demonstracyjnymi. |
-| user-service        | Python          | Zarządza kontami użytkowników oraz uwierzytelnianiem. Generuje tokeny JWT wykorzystywane przez inne serwisy. |
-| contacts            | Python          | Przechowuje listę kontaktów użytkownika wykorzystywaną np. przy wykonywaniu przelewów.                       |
-| accounts-db         | PostgreSQL      | Baza danych przechowująca dane użytkowników. Może być wstępnie zasilona danymi demonstracyjnymi.             |
-| loadgenerator       | Python / Locust | Generuje ruch w systemie, symulując zachowanie użytkowników (tworzenie kont, wykonywanie transakcji).        |
 
 ---
 
@@ -130,7 +130,7 @@ W ramach prezentacji działania systemu przewidziano następujące scenariusze t
 5. Skalowanie aplikacji
     - zwiększenie ruchu przy włączonym autoscalingu w Kubernetes
 
-Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, które będą zbierane przez Prometheus`a oraz wizualizowane w Grafanie.
+Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, które będą zbierane przez Prometheusa oraz wizualizowane w Grafanie.
 
 ## Rozdział 4: Architektura rozwiązania
 
