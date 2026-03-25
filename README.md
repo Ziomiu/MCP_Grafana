@@ -89,7 +89,7 @@ Aplikacja działa w środowisku Kubernetes i jest uruchamiana jako zestaw konten
 a cały projekt został zaprojektowany w architekturze mikroserwisowej i składa się z wielu niezależnych komponentów
 widocznych poniżej:
 
-![Architecture Diagram](images/architecture.png)
+![Architecture Diagram](images/demo_architecture.png)
 
 ### Komponenty aplikacji
 
@@ -134,4 +134,4 @@ Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, któr
 
 ## Rozdział 4: Architektura rozwiązania
 
-![Diagram architektury rozwiązania](/images/architecture.svg)
+![Diagram architektury rozwiązania](/images/project_architecture.svg)
