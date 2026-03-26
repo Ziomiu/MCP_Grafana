@@ -18,6 +18,16 @@
    2. [Grafana](#grafana)
    3. [MCP](#mcp)
 2. [Podstawy teoretyczne i stos technologiczny](#rozdział-2-podstawy-teoretyczne-i-stos-technologiczny)
+   1. [Podstawy teoretyczne](#podstawy-teoretyczne)
+      1. [Monitorowanie i obserwowalność](#monitorowanie-i-obserwowalność)
+      2. [Integracja LLM z Grafaną przez MCP](#integracja-llm-z-grafaną-przez-mcp)
+   2. [Stos technologiczny](#stos-technologiczny)
+      1. [Google Cloud Platform (GCP)](#google-cloud-platform-gcp)
+      2. [Docker](#docker)
+      3. [Prometheus](#prometheus)
+      4. [Serwer MCP Grafany](#serwer-mcp-grafany)
+      5. [OpenAI GPT-4o](#openai-gpt-4o)
+      6. [Locust](#locust)
 3. [Opis studium przypadku](#rozdział-3-opis-studium-przypadku)
    1. [Wykorzystana aplikacja](#wykorzystana-aplikacja)
    2. [Komponenty aplikacji](#komponenty-aplikacji)
@@ -100,6 +110,83 @@ Całość jest zarządzana przez _hosta_, który pełni rolę koordynatora - two
 instancji klienta.
 
 ## Rozdział 2: Podstawy teoretyczne i stos technologiczny
+
+### Podstawy teoretyczne
+
+#### Monitorowanie i obserwowalność
+
+Monitorowanie aplikacji w środowiskach chmurowych polega na zbieraniu i analizie danych
+telemetrycznych. Kluczowym pojęciem jest tutaj _obserwowalność_ (ang. _observability_), czyli
+zdolność do wnioskowania o wewnętrznym stanie systemu na podstawie jego zewnętrznych sygnałów.
+Wyróżnia się trzy filary obserwowalności:
+
+- **metrics** - numeryczne wartości reprezentujące stan systemu w czasie (np. użycie CPU,
+  liczba żądań na sekundę, opóźnienie odpowiedzi),
+- **logs** - tekstowe zapisy zdarzeń generowane przez aplikacje,
+- **traces** - rejestracja przepływu żądań przez poszczególne komponenty systemu.
+
+W projekcie skupiamy się przede wszystkim na metrykach zbieranych przez Prometheusa
+i wizualizowanych w Grafanie.
+
+#### Integracja LLM z Grafaną przez MCP
+
+Dedykowany serwer MCP umożliwia modelowi językowemu sterowanie Grafaną —
+przeglądanie dashboardów, odpytywanie źródeł danych czy tworzenie alertów.
+Przepływ komunikacji wygląda następująco:
+
+1. Użytkownik wysyła zapytanie w języku naturalnym do modelu LLM.
+2. Model rozpoznaje intencję i wywołuje odpowiednie narzędzie udostępniane przez serwer MCP.
+3. Serwer MCP Grafany wykonuje operację (np. odpytuje Prometheusa) i zwraca wynik.
+4. Model LLM interpretuje wynik i odpowiada użytkownikowi w języku naturalnym.
+
+### Stos technologiczny
+
+Poniżej opisano narzędzia wykorzystane w projekcie. Kubernetes, Grafana oraz MCP zostały
+przedstawione w rozdziale 1.
+
+#### Google Cloud Platform (GCP)
+
+Infrastruktura chmurowa projektu opiera się na platformie Google Cloud Platform.
+W ramach projektu wykorzystamy bezpłatne środki w wysokości 300 USD oferowane przez Google nowym użytkownikom.
+GCP zapewnia klaster Kubernetes poprzez usługę Google Kubernetes Engine (GKE), która automatyzuje
+zarządzanie węzłami klastra, aktualizacje oraz skalowanie.
+
+#### Docker
+
+Docker jest podstawą konteneryzacji wszystkich komponentów systemu.
+Mikroserwisy aplikacji oraz narzędzia monitoringowe pakowane są jako obrazy
+kontenerowe zgodne ze standardem OCI.
+Kubernetes zarządza następnie cyklem życia tych kontenerów w klastrze.
+
+#### Prometheus
+
+Prometheus to otwartoźródłowy system monitorowania i alarmowania, stanowiący standard
+w ekosystemie Kubernetes.
+Działa w modelu _pull_ - cyklicznie pobiera (_scrape_) metryki z endpointów HTTP udostępnianych przez
+monitorowane aplikacje.
+Zebrane metryki przechowuje we wbudowanej bazie danych szeregów czasowych i udostępnia je
+poprzez język zapytań PromQL.
+W projekcie Prometheus zbiera metryki ze wszystkich mikroserwisów aplikacji.
+
+#### Serwer MCP Grafany
+
+Serwer MCP Grafany to osobny projekt otwartoźródłowy, który łączy się z Grafaną przez jej HTTP API.
+Udostępnia narzędzia pozwalające modelom LLM na sterowanie Grafaną — odpytywanie źródeł danych,
+zarządzanie dashboardami czy analizę metryk.
+
+#### OpenAI GPT-4o
+
+GPT-4o to model językowy firmy OpenAI wykorzystywany w projekcie do komunikacji z Grafaną
+przez protokół MCP. Interpretuje dane monitoringowe i odpowiada użytkownikowi w języku naturalnym.
+Wybór dostawcy i modelu może ulec zmianie w trakcie realizacji projektu.
+
+#### Locust
+
+Locust to otwartoźródłowe narzędzie do testów obciążeniowych napisane w języku Python.
+Pozwala na symulowanie zachowania wielu równoczesnych użytkowników wysyłających żądania HTTP
+do testowanej aplikacji.
+W projekcie Locust generuje syntetyczny ruch użytkowników, który umożliwia obserwację
+zachowania systemu pod obciążeniem w Grafanie.
 
 ## Rozdział 3: Opis studium przypadku
 
