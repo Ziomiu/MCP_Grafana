@@ -164,7 +164,7 @@ Prometheus to otwartoźródłowy system monitorowania i alarmowania, stanowiący
 w ekosystemie Kubernetes.
 Działa w modelu _pull_ - cyklicznie pobiera (_scrape_) metryki z endpointów HTTP udostępnianych przez
 monitorowane aplikacje.
-Zebrane metryki przechowuje w wbudowanej bazie danych szeregów czasowych i udostępnia je
+Zebrane metryki przechowuje we wbudowanej bazie danych szeregów czasowych i udostępnia je
 poprzez język zapytań PromQL.
 W projekcie Prometheus zbiera metryki ze wszystkich mikroserwisów aplikacji.
 
