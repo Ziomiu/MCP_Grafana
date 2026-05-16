@@ -1,0 +1,29 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'github>GoogleCloudPlatform/kubernetes-engine-samples//.github/renovate-configs/dee-platform-ops.json5',
+    ':approveMajorUpdates',
+    'schedule:earlyMondays',
+  ],
+  'pip-compile': {
+    enabled: true,
+    managerFilePatterns: [
+      '/(^|/)requirements\\.txt$/',
+    ],
+  },
+  pip_requirements: {
+    enabled: false,
+  },
+  constraints: {
+    python: '~=3.11.0',
+  },
+  kubernetes: {
+    managerFilePatterns: [
+      '/\\.yaml$/',
+    ],
+    ignorePaths: [
+      'kubernetes-manifests/**',
+    ],
+  },
+  packageRules: [],
+}
