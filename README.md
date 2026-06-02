@@ -689,10 +689,12 @@ Najpierw udostępniliśmy Grafanę z wykorzystaniem Load Balancera:
 
 Prometheus jest automatycznie przyłączony jako data source Grafany i zbierane metryki są w niej dostępne bez dodatkowej konfiguracji.
 
-Przygotowaliśmy i zaimportowaliśmy dashboard, który pozwala na bieżąco śledzić kondycję wszystkich mikroserwisów Bank of Anthos.
+![Grafana - podłączenie Prometheusa](./images/grafana_prometheus.png)
+
+Następnie przygotowaliśmy i zaimportowaliśmy dashboard, który pozwala na bieżąco śledzić kondycję wszystkich mikroserwisów Bank of Anthos.
 Wyświetla on dostępność każdego z nich, czas odpowiedzi oraz zwracany kod HTTP, a w ramach uzupełnienia także zużycie zasobów ich podów - CPU, pamięć i liczbę restartów.
 
-```
+```json
 {
   "title": "Bank of Anthos",
   "uid": "bank-of-anthos",
@@ -816,29 +818,13 @@ Wyświetla on dostępność każdego z nich, czas odpowiedzi oraz zwracany kod H
 
 Poniżej opisane są kolejne czynności wykonane w celu integracji serwera MCP z Grafaną.
 
-1. Połączenie z klastrem
-
-```
-> brew install google-cloud-sdk
-> gcloud auth login
-> gcloud components install gke-gcloud-auth-plugin
-> gcloud container clusters get-credentials bank-of-anthos --region us-central1 --project suu-2026
-> kubectl get nodes
-```
-
-2. Skalowanie klastra
-
-```
-> gcloud container clusters resize bank-of-anthos --node-pool default-pool --num-nodes 3 --zone us-central1
-```
-
-3. Pobranie hasła do dashboardu Grafany
+1. Pobranie hasła do dashboardu Grafany
 
 ```
 > kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
-4. Dodanie Grafany MCP
+2. Dodanie Grafany MCP
 
 W zawartej poniżej komendzie `<GRAFANA_API_KEY>` to klucz powiązany z kontem dla serwisu `mcp`.
 
@@ -849,10 +835,10 @@ W zawartej poniżej komendzie `<GRAFANA_API_KEY>` to klucz powiązany z kontem d
 > helm install grafana-mcp grafana-community/grafana-mcp --namespace monitoring --set grafana.url=http://monitoring-grafana.monitoring.svc.cluster.local --set grafana.apiKey=<GRAFANA_API_KEY>
 ```
 
-5. Połączenie z Claude Desktop
+3. Połączenie z Claude Desktop
 
 ```
-> kubectl port-forward svc/grafana-mcp 8080:8080 -n monitoring
+> kubectl port-forward svc/grafana-mcp 8000:8000 -n monitoring
 > npx mcp-remote http://localhost:8000/sse
 ```
 
