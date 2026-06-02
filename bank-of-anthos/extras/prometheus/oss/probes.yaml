@@ -15,11 +15,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
+  labels:
+    release: monitoring
   name: frontend-probe
 spec:
   jobName: frontend
   prober:
-    url: tutorial-kube-prometheus-blackbox-exporter:19115
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
     path: /probe
   module: http_2xx
   interval: 60s
@@ -29,16 +31,18 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - frontend:80
+        - frontend.default.svc.cluster.local:80
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
+  labels:
+    release: monitoring
   name: userservice-probe
 spec:
   jobName: userservice
   prober:
-    url: tutorial-kube-prometheus-blackbox-exporter:19115
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
     path: /probe
   module: http_2xx
   interval: 60s
@@ -48,16 +52,18 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - userservice:8080/ready
+        - userservice.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
+  labels:
+    release: monitoring
   name: balancereader-probe
 spec:
   jobName: balancereader
   prober:
-    url: tutorial-kube-prometheus-blackbox-exporter:19115
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
     path: /probe
   module: http_2xx
   interval: 60s
@@ -67,16 +73,18 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - balancereader:8080/ready
+        - balancereader.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
+  labels:
+    release: monitoring
   name: contacts-probe
 spec:
   jobName: contacts
   prober:
-    url: tutorial-kube-prometheus-blackbox-exporter:19115
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
     path: /probe
   module: http_2xx
   interval: 60s
@@ -86,16 +94,18 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - contacts:8080/ready
+        - contacts.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
+  labels:
+    release: monitoring
   name: ledgerwriter-probe
 spec:
   jobName: ledgerwriter
   prober:
-    url: tutorial-kube-prometheus-blackbox-exporter:19115
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
     path: /probe
   module: http_2xx
   interval: 60s
@@ -105,16 +115,18 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - ledgerwriter:8080/ready
+        - ledgerwriter.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
+  labels:
+    release: monitoring
   name: transactionhistory-probe
 spec:
   jobName: transactionhistory
   prober:
-    url: tutorial-kube-prometheus-blackbox-exporter:19115
+    url: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
     path: /probe
   module: http_2xx
   interval: 60s
@@ -124,4 +136,4 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - transactionhistory:8080/ready
+        - transactionhistory.default.svc.cluster.local:8080/ready
