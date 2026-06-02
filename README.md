@@ -33,13 +33,21 @@
    2. [Komponenty aplikacji](#komponenty-aplikacji)
    3. [Scenariusze testowania aplikacji](#scenariusze-testowania-aplikacji)
 4. [Architektura rozwiązania](#rozdział-4-architektura-rozwiązania)
-5. [Konfiguracja środowiska](#rozdział-5-konfiguracja-środowiska)
-6. [Sposób instalacji](#rozdział-6-sposób-instalacji)
-7. [Etapy wdrażania demo](#rozdział-7-etapy-wdrażania-demo)
-   1. [Konfiguracja](#konfiguracja)
-   2. [Przygotowanie danych](#przygotowanie-danych)
-8. [Opis demo](#rozdział-8-opis-demo)
-   1. [Procedura wykonania](#procedura-wykonania)
+5. [Opis środowiska](#rozdział-5-opis-środowiska)
+   1. [Ekosystem Google Cloud Platform (GCP)](#ekosystem-google-cloud-platform-gcp)
+   2. [Bank of Anthos jako referencyjne środowisko](#bank-of-anthos-jako-referencyjne-środowisko)
+6. [Sposób instalacji demo](#rozdział-6-sposób-instalacji-demo)
+   1. [Uruchomienie samouczka](#uruchomienie-samouczka)
+   2. [Wczytanie środowiska i utworzenie projektu](#wczytanie-środowiska-i-utworzenie-projektu)
+   3. [Konfiguracja klastra Kubernetesa](#konfiguracja-klastra-kubernetesa)
+   4. [Wdrożenie tokenu JWT](#wdrożenie-tokenu-jwt)
+   5. [Uruchomienie aplikacji w klastrze Kubernetesa](#uruchomienie-aplikacji-w-klastrze-kubernetesa)
+7. [Integracja Prometheusa, Grafany i serwera MCP](#rozdział-7-integracja-prometheusa-grafany-i-serwera-mcp)
+   1. [Integracja Prometheusa](#integracja-prometheusa)
+   2. [Integracja Grafany](#integracja-grafany)
+   3. [Integracja serwera MCP](#integracja-serwera-mcp)
+8. [Przedstawienie działania aplikacji](#rozdział-8-przedstawienie-działania-aplikacji)
+   1. [Przebieg wykonania](#przebieg-wykonania)
    2. [Wyniki](#wyniki)
 9. [Podsumowanie i wnioski](#rozdział-9-podsumowanie-i-wnioski)
 10. [Referencje](#rozdział-10-referencje)
@@ -253,19 +261,484 @@ Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, któr
 
 ![Diagram architektury rozwiązania](/images/project_architecture.svg)
 
-## Rozdział 5: Konfiguracja środowiska
+## Rozdział 5: Opis środowiska
 
-## Rozdział 6: Sposób instalacji
+### Ekosystem Google Cloud Platform (GCP)
 
-## Rozdział 7: Etapy wdrażania demo
+W realizacji projektu wykorzystujemy środowisko Google Cloud Platform.
+Wybór GCP jako fundamentu projektu podyktowany był natywnym wsparciem dla technologii kontenerowych i analitycznych.
+Platforma ta oferuje szereg kluczowych usług w kontekście uruchomienia aplikacji:
 
-### Konfiguracja
+- **Google Kubernetes Engine (GKE)**: zarządzalne środowisko Kubernetes, które zdejmuje z administratora ciężar utrzymania warstwy sprzętowej (Control Plane).
+GKE pozwala na dynamiczne skalowanie zasobów (w górę i do zera), co jest wykorzystywane w celu optymalizacji kosztów projektu.
 
-### Przygotowanie danych
+- **Zarządzanie tożsamością i dostępem (IAM)**: wykorzystane do bezpiecznego nadawania uprawnień dla serwera MCP, aby mógł on bezpiecznie komunikować się z API Grafany bez upubliczniania wrażliwych kluczy.
 
-## Rozdział 8: Opis demo
+- **Wirtualna chmura prywatna (VPC)**: zapewnia izolację mikroserwisów aplikacji Bank of Anthos oraz umożliwia wystawienie Load Balancera, przez który serwer MCP łączy się z dashboardami Grafany.
 
-### Procedura wykonania
+Bardzo ważnym czynnikiem jest również oferta bezpłatnych środków (300 USD) oferowanych przez Google dla nowych użytkowników w połączeniu z możliwościami GKE.
+Dzięki temu, że możemy "wyłączać" klaster kiedy nie jest on używany, przez ten czas nie są pobierane koszty.
+Pozwala to na zapewnienie działania klastra wtedy, kiedy jest to wymagane, przez cały czas trwania projektu, nie martwiąc się o przekroczenie limitów. 
+
+### Bank of Anthos jako referencyjne środowisko
+
+Bank of Anthos to aplikacja typu _cloud-native_, która idealnie symuluje rzeczywiste środowisko bankowe.
+W naszym projekcie pełni ona rolę "źródła prawdy", generując złożone dane telemetryczne.
+Zapewnia następujące możliwości:
+
+- Złożona topologia – dzięki podziałowi na wiele serwisów (Frontend, Ledger, Transaction, User Service) możemy testować, czy LLM przez MCP potrafi poprawnie zidentyfikować przykładowo który konkretnie element systemu uległ awarii czy w największym stopniu obciąża pamięć.
+
+- Różnorodność metryk – aplikacja generuje zarówno metryki biznesowe (liczba transakcji, salda), jak i techniczne (użycie pamięci przez Java VM, opóźnienia bazy danych PostgreSQL itp.).
+
+- Łatwość wstrzykiwania błędów – wykorzystujemy Bank of Anthos do pokazania "inteligencji" MCP – np. celowo wyłączamy jeden z serwisów, a LLM analizując dane z Grafany, informuje nas o tym fakcie w języku naturalnym.
+
+## Rozdział 6: Sposób instalacji demo
+
+Aby poprawnie uruchomić aplikację na klastrze Kubernetes w środowisku GCP, wykonaliśmy kolejno kroki z samouczka, który jest udostępniony z poziomu README w [repozytorium aplikacji Bank of Anthos](https://github.com/googlecloudplatform/bank-of-anthos).
+
+### Uruchomienie samouczka
+
+Aby otworzyć odpowiednio skonfigurowane środowisko _Google Cloud Shell_, należy kliknąć przycisk "Open in Google Cloud Shell" w sekcji **Interactive Quickstart (GKE)**.
+
+![Przycisk](./images/interactive_quickstart.png)
+
+### Wczytanie środowiska i utworzenie projektu
+
+Należy chwilę odczekać, aż wszystkie wymagane komponenty się wczytają.
+
+![Ładowanie Google Cloud Shell](./images/loading_gcs.png)
+
+Następnie główną część obszaru roboczego zajmuje Cloud Shell Editor, w którym w następnych krokach będziemy wykonywać właściwe akcje, a w panelu po prawej stronie otwiera się interaktywny samouczek.
+Wybieramy z jego poziomu "Utwórz nowy projekt".
+
+![Tutorial - utworzenie projektu](./images/tutorial_create.png)
+
+W nowo otwartym oknie podajemy nazwę projektu i wybieramy "Utwórz".
+
+![Tutorial - nowy projekt](./images/create_project.png)
+
+Po utworzeniu projektu zaznaczamy go w liście wyboru i klikamy "Rozpocznij".
+
+![Tutorial - wybranie projektu](./images/tutorial_select.png)
+
+### Konfiguracja klastra Kubernetesa
+
+Postępujemy zgodnie z instrukcjami zawartymi w panelu po prawej stronie.
+Zgodnie ze wcześniejszym opisem, wykorzystujemy Google Kubernetes Engine.
+
+![Tutorial - klaster](./images/tutorial_cluster_setup.png)
+
+Wykonujemy wskazane kroki z odpowiedniej sekcji instrukcji, zilustrowanej poniżej.
+Następnie wybieramy "Dalej".
+
+![Tutorial - GKE](./images/tutorial_GKE.png)
+
+**UWAGA!**
+Aby zmieścić się w limitach w ramach oferowanych bezpłatnych zasobów GCP, zmieniliśmy niektóre ustawienia:
+
+- Node count: 3 zamiast 4,
+- Machine type: _e2-medium_ zamiast _e2-standard-2_,
+- Rozmiar dysku rozruchowego (w ustawieniach puli węzłów): 30GB zamiast 100GB.
+
+### Wdrożenie tokenu JWT
+
+Kolejnym krokiem jest wdrożenie tokenu JWT (JSON Web Token), który jest wykorzystywany przy tworzeniu kont użytkowników i ich autentykacji.
+
+![Tutorial - JWT](./images/tutorial_JWT.png)
+
+Zawartość pliku `jwt-secret.yaml` (bez kluczy):
+
+```yaml
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# This secret contains a keypair used to sign and verify JWTs for authentication
+# In practice, this should never be checked into version control. It is provided here to simplify deployment
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jwt-key
+type: Opaque
+data:
+  jwtRS256.key: [REDACTED]
+  jwtRS256.key.pub: [REDACTED]
+```
+
+### Uruchomienie aplikacji w klastrze Kubernetesa
+
+Teraz możemy przejść do uruchomienia aplikacji Bank of Anthos w utworzonym wcześniej klastrze Kubernetesa.
+
+![Tutorial - uruchomienie](./images/tutorial_run.png)
+
+Zawartość wspomnianego pliku `skaffold.yaml`:
+
+```yaml
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: bank-of-anthos
+requires:
+- configs:
+  - accounts
+  path: src/accounts/skaffold.yaml
+- configs:
+  - ledger
+  path: src/ledger/skaffold.yaml
+- configs:
+  - frontend
+  path: src/frontend/skaffold.yaml
+- configs:
+  - loadgenerator
+  path: src/loadgenerator/skaffold.yaml
+- configs:
+  - accounts-db
+  path: src/accounts/accounts-db/skaffold.yaml
+- configs:
+  - ledger-db
+  path: src/ledger/ledger-db/skaffold.yaml
+deploy:
+  tolerateFailuresUntilDeadline: true
+```
+
+Był to ostatni "właściwy" krok do wykonania, bowiem kolejne kroki samouczka opisują sposób usuwania klastra i czyszczenia zasobów po nim, oraz przedstawiają ekran podsumowujący cały proces.
+
+## Rozdział 7: Integracja Prometheusa, Grafany i serwera MCP
+
+Przedstawiamy kroki, które wykonaliśmy w celu zbierania metryk z działającej aplikacji, wizualizowania ich w przystępny sposób oraz umożliwienia wykorzystania modelu LLM do pobierania udostępnionych informacji poprzez zapytania w języku naturalnym.
+
+### Integracja Prometheusa
+
+Aby zainstalować Prometheusa na klastrze, należy wykonać instrukcje:
+
+```
+> helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+> helm repo update
+> helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring
+> helm install blackbox prometheus-community/prometheus-blackbox-exporter --namespace monitoring
+```
+
+Następnie konieczne były zmiany domyślnych wartości w plikach `probes.yaml` oraz `rules.yaml`, aby dostosować je do konkretnych wartości wykorzystywanych w naszym stosie technologicznym.
+
+**Plik** `probes.yaml`:
+
+```yaml
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: frontend-probe
+spec:
+  jobName: frontend
+  prober:
+    url: tutorial-kube-prometheus-blackbox-exporter:19115 # zmiana na: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    path: /probe
+  module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
+  targets:
+    staticConfig:
+      labels:
+        app: bank-of-anthos
+      static:
+        - frontend:80 # zmiana na: frontend.default.svc.cluster.local:80
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: userservice-probe
+spec:
+  jobName: userservice
+  prober:
+    url: tutorial-kube-prometheus-blackbox-exporter:19115 # zmiana na: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    path: /probe
+  module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
+  targets:
+    staticConfig:
+      labels:
+        app: bank-of-anthos
+      static:
+        - userservice:8080/ready
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: balancereader-probe
+spec:
+  jobName: balancereader
+  prober:
+    url: tutorial-kube-prometheus-blackbox-exporter:19115 # zmiana na: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    path: /probe
+  module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
+  targets:
+    staticConfig:
+      labels:
+        app: bank-of-anthos
+      static:
+        - balancereader:8080/ready
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: contacts-probe
+spec:
+  jobName: contacts
+  prober:
+    url: tutorial-kube-prometheus-blackbox-exporter:19115 # zmiana na: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    path: /probe
+  module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
+  targets:
+    staticConfig:
+      labels:
+        app: bank-of-anthos
+      static:
+        - contacts:8080/ready
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: ledgerwriter-probe
+spec:
+  jobName: ledgerwriter
+  prober:
+    url: tutorial-kube-prometheus-blackbox-exporter:19115 # zmiana na: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    path: /probe
+  module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
+  targets:
+    staticConfig:
+      labels:
+        app: bank-of-anthos
+      static:
+        - ledgerwriter:8080/ready
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: transactionhistory-probe
+spec:
+  jobName: transactionhistory
+  prober:
+    url: tutorial-kube-prometheus-blackbox-exporter:19115 # zmiana na: blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    path: /probe
+  module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
+  targets:
+    staticConfig:
+      labels:
+        app: bank-of-anthos
+      static:
+        - transactionhistory:8080/ready
+```
+
+**Plik** `rules.yaml`:
+
+```yaml
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: uptime-rule
+spec:
+  groups:
+  - name: Micro services uptime
+    interval: 60s
+    rules:
+    - alert: BalancereaderUnavaiable
+      expr: probe_success{app="bank-of-anthos",job="balancereader"} == 0
+      for: 1m
+      annotations:
+        summary: Balance Reader Service is unavailable
+        description: Check Balance Reader pods and it's logs
+      labels:
+        severity: 'critical'
+    - alert: ContactsUnavaiable
+      expr: probe_success{app="bank-of-anthos",job="contacts"} == 0
+      for: 1m
+      annotations:
+        summary: Contacs Service is unavailable
+        description: Check Contacs pods and it's logs
+      labels:
+        severity: 'warning'
+    - alert: FrontendUnavaiable
+      expr: probe_success{app="bank-of-anthos",job="frontend"} == 0
+      for: 1m
+      annotations:
+        summary: Frontend Service is unavailable
+        description: Check Frontend pods and it's logs
+      labels:
+        severity: 'critical'
+    - alert: LedgerwriterUnavaiable
+      expr: probe_success{app="bank-of-anthos",job="ledgerwriter"} == 0
+      for: 1m
+      annotations:
+        summary: Ledger Writer Service is unavailable
+        description: Check Ledger Writer pods and it's logs
+      labels:
+        severity: 'critical'
+    - alert: TransactionhistoryUnavaiable
+      expr: probe_success{app="bank-of-anthos",job="transactionhistory"} == 0
+      for: 1m
+      annotations:
+        summary: Transaction History Service is unavailable
+        description: Check Transaction History pods and it's logs
+      labels:
+        severity: 'critical'
+    - alert: UserserviceUnavaiable
+      expr: probe_success{app="bank-of-anthos",job="userservice"} == 0
+      for: 1m
+      annotations:
+        summary: User Service is unavailable
+        description: Check User Service pods and it's logs
+      labels:
+        severity: 'critical'
+```
+
+Po odpowiednim przygotowaniu powyższych plików aplikujemy je:
+
+```
+> kubectl -n monitoring apply -f bank-of-anthos/extras/prometheus/oss/probes.yaml
+> kubectl -n monitoring apply -f bank-of-anthos/extras/prometheus/oss/rules.yaml
+```
+
+### Integracja Grafany
+
+Najpierw udostępniliśmy Grafanę z wykorzystaniem Load Balancera:
+
+```
+> kubectl -n monitoring patch svc monitoring-grafana -p '{"spec":{"type":"LoadBalancer"}}'
+```
+
+Dalsze kroki w celu połączenia Grafany z metrykami zbieranymi przez Prometheusa wykonaliśmy z poziomu GUI: 
+
+<insert zdjęcia>
+
+### Integracja serwera MCP
+
+Poniżej opisane są kolejne czynności wykonane w celu integracji serwera MCP z Grafaną.
+
+1. Połączenie z klastrem
+
+```
+> brew install google-cloud-sdk
+> gcloud auth login
+> gcloud components install gke-gcloud-auth-plugin
+> gcloud container clusters get-credentials bank-of-anthos --region us-central1 --project suu-2026
+> kubectl get nodes
+```
+
+2. Skalowanie klastra
+
+```
+> gcloud container clusters resize bank-of-anthos --node-pool default-pool --num-nodes 3 --zone us-central1
+```
+
+3. Pobranie hasła do dashboardu Grafany
+
+```
+> kubectl get secret monitoring-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+```
+
+4. Dodanie Grafany MCP
+
+W zawartej poniżej komendzie `<GRAFANA_API_KEY>` to klucz powiązany z kontem dla serwisu `mcp`.
+
+```
+> brew install helm
+> helm repo add grafana-community https://grafana-community.github.io/helm-charts
+> helm repo update
+> helm install grafana-mcp grafana-community/grafana-mcp --namespace monitoring --set grafana.url=http://monitoring-grafana.monitoring.svc.cluster.local --set grafana.apiKey=<GRAFANA_API_KEY>
+```
+
+5. Połączenie z Claude Desktop
+
+```
+> kubectl port-forward svc/grafana-mcp 8080:8080 -n monitoring
+> npx mcp-remote http://localhost:8000/sse
+```
+
+Następnie należy otworzyć plik `claude_desktop_config.json` i dodać na końcu:
+
+```json
+{
+
+	... dotychczasowa zawartość ...
+
+	"mcpServers": {
+	  "grafana": {
+	    "command": "npx",
+	    "args": [
+	      "mcp-remote",
+	      "http://localhost:8000/sse"
+	    ]
+	  }
+	}
+}
+```
+
+Po zrestartowaniu aplikacji Claude Desktop 
+wtyczka `grafana` powinna być domyślnie włączona.
+
+## Rozdział 8: Przedstawienie działania aplikacji
+
+### Przebieg wykonania
 
 ### Wyniki
 
