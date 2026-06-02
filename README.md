@@ -283,12 +283,12 @@ Pozwala to na zapewnienie działania klastra wtedy, kiedy jest to wymagane, prze
 ### Bank of Anthos jako referencyjne środowisko
 
 Bank of Anthos to aplikacja typu _cloud-native_, która idealnie symuluje rzeczywiste środowisko bankowe.
-W naszym projekcie pełni ona rolę "źródła prawdy", generując złożone dane telemetryczne.
+W naszym projekcie pełni ona rolę "źródła prawdy", generując różnorodne dane telemetryczne.
 Zapewnia następujące możliwości:
 
 - Złożona topologia – dzięki podziałowi na wiele serwisów (Frontend, Ledger, Transaction, User Service) możemy testować, czy LLM przez MCP potrafi poprawnie zidentyfikować przykładowo który konkretnie element systemu uległ awarii czy w największym stopniu obciąża pamięć.
 
-- Różnorodność metryk – aplikacja generuje zarówno metryki biznesowe (liczba transakcji, salda), jak i techniczne (użycie pamięci przez Java VM, opóźnienia bazy danych PostgreSQL itp.).
+- Dostarczanie metryk – aplikacja generuje metryki techniczne, takie jak użycie pamięci przez Java VM, opóźnienia bazy danych PostgreSQL itp.
 
 - Łatwość wstrzykiwania błędów – wykorzystujemy Bank of Anthos do pokazania "inteligencji" MCP – np. celowo wyłączamy jeden z serwisów, a LLM analizując dane z Grafany, informuje nas o tym fakcie w języku naturalnym.
 
@@ -464,6 +464,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
   name: frontend-probe
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   jobName: frontend
   prober:
@@ -483,6 +486,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
   name: userservice-probe
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   jobName: userservice
   prober:
@@ -496,12 +502,15 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - userservice:8080/ready
+        - userservice:8080/ready # zmiana na: userservice.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
   name: balancereader-probe
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   jobName: balancereader
   prober:
@@ -515,12 +524,15 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - balancereader:8080/ready
+        - balancereader:8080/ready # zmiana na: balancereader.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
   name: contacts-probe
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   jobName: contacts
   prober:
@@ -534,12 +546,15 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - contacts:8080/ready
+        - contacts:8080/ready # zmiana na: contacts.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
   name: ledgerwriter-probe
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   jobName: ledgerwriter
   prober:
@@ -553,12 +568,15 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - ledgerwriter:8080/ready
+        - ledgerwriter:8080/ready # zmiana na: ledgerwriter.default.svc.cluster.local:8080/ready
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
   name: transactionhistory-probe
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   jobName: transactionhistory
   prober:
@@ -572,7 +590,7 @@ spec:
       labels:
         app: bank-of-anthos
       static:
-        - transactionhistory:8080/ready
+        - transactionhistory:8080/ready # zmiana na: transactionhistory.default.svc.cluster.local:8080/ready
 ```
 
 **Plik** `rules.yaml`:
@@ -596,6 +614,9 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: uptime-rule
+# Dodanie label monitoringu:
+# labels:
+#   release: monitoring
 spec:
   groups:
   - name: Micro services uptime
@@ -666,9 +687,130 @@ Najpierw udostępniliśmy Grafanę z wykorzystaniem Load Balancera:
 > kubectl -n monitoring patch svc monitoring-grafana -p '{"spec":{"type":"LoadBalancer"}}'
 ```
 
-Dalsze kroki w celu połączenia Grafany z metrykami zbieranymi przez Prometheusa wykonaliśmy z poziomu GUI: 
+Prometheus jest automatycznie przyłączony jako data source Grafany i zbierane metryki są w niej dostępne bez dodatkowej konfiguracji.
 
-<insert zdjęcia>
+Przygotowaliśmy i zaimportowaliśmy dashboard, który pozwala na bieżąco śledzić kondycję wszystkich mikroserwisów Bank of Anthos.
+Wyświetla on dostępność każdego z nich, czas odpowiedzi oraz zwracany kod HTTP, a w ramach uzupełnienia także zużycie zasobów ich podów - CPU, pamięć i liczbę restartów.
+
+```
+{
+  "title": "Bank of Anthos",
+  "uid": "bank-of-anthos",
+  "tags": ["bank-of-anthos"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {"text": "Prometheus", "value": "Prometheus"},
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Service Up",
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 4},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "probe_success{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {"type": "value", "options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}}
+          ],
+          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
+          "color": {"mode": "thresholds"}
+        }
+      },
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"}
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Availability over time",
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "probe_success{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"min": 0, "max": 1, "unit": "short"}}
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Probe latency",
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "probe_duration_seconds{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "HTTP status code per service",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "probe_http_status_code{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "DNS lookup time (probe)",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "probe_dns_lookup_time_seconds{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Pod CPU (default ns)",
+      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"default\", container!=\"\", container!=\"POD\"}[5m]))", "legendFormat": "{{pod}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Pod memory (default ns)",
+      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"default\", container!=\"\", container!=\"POD\"})", "legendFormat": "{{pod}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Pod restarts (default ns)",
+      "gridPos": {"x": 0, "y": 28, "w": 24, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "targets": [
+        {"expr": "sum by (pod) (kube_pod_container_status_restarts_total{namespace=\"default\"})", "legendFormat": "{{pod}}", "refId": "A"}
+      ]
+    }
+  ]
+}
+```
 
 ### Integracja serwera MCP
 
