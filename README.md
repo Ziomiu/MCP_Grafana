@@ -234,28 +234,24 @@ widocznych poniżej:
 
 ### Scenariusze testowania aplikacji
 
-W ramach prezentacji działania systemu przewidziano następujące scenariusze testowe dla aplikacji:
+W ramach prezentacji działania systemu przewidziano następujące scenariusze testowe:
 
-1. Normalne działanie aplikacji
-   - niski poziom ruchu
-   - standardowe operacje użytkownika
+1. Weryfikacja widoczności serwisów w Grafanie
 
-2. Zwiększone obciążenie
-   - stopniowe zwiększanie liczby użytkowników
-   - intensyfikacja wykonywanych operacji
+- sprawdzenie, czy wszystkie serwisy postawione w klastrze są monitorowane
+- identyfikacja serwisów aplikacyjnych, infrastruktury Kubernetes oraz stosu monitoringowego
 
-3. Przeciążenie systemu
-   - nagłe zwiększenie liczby użytkowników,
-   - bardzo intensywne obciążenie wszystkich serwisów.
+2. Analiza zużycia pamięci przez wybrany serwis
 
-4. Awaria komponentu
-   - wyłączenie jednego z kluczowych serwisów
-   - dalsze generowanie ruchu
+- odpytanie Prometheusa o metryki pamięci dla `userservice` z ostatniej godziny
+- wizualizacja wykresu oraz interpretacja zaobserwowanych trendów
 
-5. Skalowanie aplikacji
-   - zwiększenie ruchu przy włączonym autoscalingu w Kubernetesie
+3. Analiza wielu metryk dla wybranego serwisu w zadanym oknie czasowym
 
-Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, które będą zbierane przez Prometheusa oraz wizualizowane w Grafanie.
+- jednoczesne pobranie i wizualizacja zużycia pamięci oraz CPU dla `frontend`
+- weryfikacja poprawności uwzględnienia parametru czasowego podanego w języku naturalnym
+
+Na podstawie powyższych scenariuszy weryfikowane będzie działanie całego systemu, od zbierania metryk przez Prometheusa, przez wizualizację w Grafanie, aż po sterowanie Grafaną z poziomu modelu językowego przez protokół MCP.
 
 ## Rozdział 4: Architektura rozwiązania
 
