@@ -969,4 +969,28 @@ Model podsumował, że `frontend` działa stabilnie i mieści się w normalnych 
 
 ## Rozdział 9: Podsumowanie i wnioski
 
+W ramach projektu zrealizowany został postawiony cel, którym było zademonstrowanie wykorzystania serwera MCP dla Grafany do sterowania monitoringiem aplikacji mikroserwisowej z poziomu modelu LLM w języku naturalnym.
+
+Przeprowadzone scenariusze potwierdziły poprawne działanie całego stosu — od zbierania metryk przez Prometheusa, przez ich wizualizację w Grafanie, aż po sterowanie Grafaną z poziomu modelu językowego przez protokół MCP. Model nie tylko pobierał dane, ale potrafił je interpretować: rozróżniał między spikiem pamięci spowodowanym garbage collection a realnym wzrostem zużycia, identyfikował normalne wahania CPU oraz poprawnie uwzględniał parametry czasowe przekazane w zapytaniu w języku naturalnym.
+
+W trakcie realizacji projektu napotkaliśmy kilka wyzwań:
+
+- konieczność ręcznej modyfikacji domyślnych plików konfiguracyjnych (`probes.yaml`, `rules.yaml`) dostarczanych z repozytorium Bank of Anthos,
+- ograniczenia budżetowe GCP wymusiły obniżenie specyfikacji klastra (mniejsza liczba węzłów, mniejszy dysk rozruchowy),
+- serwer MCP Grafany wymaga lokalnego przekierowania portów (`port-forward`), co w środowisku produkcyjnym wymagałoby dodatkowego zabezpieczenia.
+
+Naturalnym kierunkiem rozwoju projektu byłoby wdrożenie scenariuszy awarii z aktywnym alertingiem przez MCP, integracja z narzędziami do automatycznej remediacji (np. restart podu inicjowany przez model), a także zastąpienie lokalnego przekierowywania portów bezpiecznym, publicznie dostępnym endpointem z uwierzytelnianiem.
+
+Sam serwer Grafana MCP działa bardzo dobrze w połączeniu z odpowiednim modelem językowym, a całość systemu prezentowała się zaskakująco dobrze.
+
 ## Rozdział 10: Referencje
+
+1. Dokumentacja Kubernetes — https://kubernetes.io/docs/
+2. Dokumentacja Grafany — https://grafana.com/docs/
+3. Model Context Protocol (MCP) — https://modelcontextprotocol.io/
+4. Grafana MCP Server — https://github.com/grafana/mcp-grafana
+5. Bank of Anthos — https://github.com/GoogleCloudPlatform/bank-of-anthos
+6. Dokumentacja Prometheusa — https://prometheus.io/docs/
+7. Google Kubernetes Engine — https://cloud.google.com/kubernetes-engine/docs
+8. Locust — https://locust.io/
+9. Helm — https://helm.sh/docs/
