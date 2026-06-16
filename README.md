@@ -207,7 +207,7 @@ Bank of Anthos symuluje działanie systemu bankowego, umożliwiając użytkownik
 finansowych, takich jak przeglądanie salda konta, wykonywanie przelewów i zarządzanie historią transakcji.
 
 | Login                      | Strona główna                                 |
-|----------------------------|-----------------------------------------------|
+| -------------------------- | --------------------------------------------- |
 | ![Login](images/login.png) | ![User Transactions](images/transactions.png) |
 
 Aplikacja działa w środowisku Kubernetes i jest uruchamiana jako zestaw kontenerów,
@@ -219,7 +219,7 @@ widocznych poniżej:
 ### Komponenty aplikacji
 
 | Serwis              | Język           | Opis                                                                                                         |
-|---------------------|-----------------|--------------------------------------------------------------------------------------------------------------|
+| ------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
 | loadgenerator       | Python / Locust | Generuje ruch w systemie, symulując zachowanie użytkowników (tworzenie kont, wykonywanie transakcji).        |
 | frontend            | Python          | Udostępnia serwer HTTP obsługujący interfejs użytkownika (strona logowania, rejestracji oraz strona główna). |
 | user-service        | Python          | Zarządza kontami użytkowników oraz uwierzytelnianiem. Generuje tokeny JWT wykorzystywane przez inne serwisy. |
@@ -237,23 +237,23 @@ widocznych poniżej:
 W ramach prezentacji działania systemu przewidziano następujące scenariusze testowe dla aplikacji:
 
 1. Normalne działanie aplikacji
-    - niski poziom ruchu
-    - standardowe operacje użytkownika
+   - niski poziom ruchu
+   - standardowe operacje użytkownika
 
 2. Zwiększone obciążenie
-    - stopniowe zwiększanie liczby użytkowników
-    - intensyfikacja wykonywanych operacji
+   - stopniowe zwiększanie liczby użytkowników
+   - intensyfikacja wykonywanych operacji
 
 3. Przeciążenie systemu
-    - nagłe zwiększenie liczby użytkowników,
-    - bardzo intensywne obciążenie wszystkich serwisów.
+   - nagłe zwiększenie liczby użytkowników,
+   - bardzo intensywne obciążenie wszystkich serwisów.
 
 4. Awaria komponentu
-    - wyłączenie jednego z kluczowych serwisów
-    - dalsze generowanie ruchu
+   - wyłączenie jednego z kluczowych serwisów
+   - dalsze generowanie ruchu
 
 5. Skalowanie aplikacji
-    - zwiększenie ruchu przy włączonym autoscalingu w Kubernetesie
+   - zwiększenie ruchu przy włączonym autoscalingu w Kubernetesie
 
 Na podstawie powyższych scenariuszy generowane będą dane telemetryczne, które będą zbierane przez Prometheusa oraz wizualizowane w Grafanie.
 
@@ -270,7 +270,7 @@ Wybór GCP jako fundamentu projektu podyktowany był natywnym wsparciem dla tech
 Platforma ta oferuje szereg kluczowych usług w kontekście uruchomienia aplikacji:
 
 - **Google Kubernetes Engine (GKE)**: zarządzalne środowisko Kubernetes, które zdejmuje z administratora ciężar utrzymania warstwy sprzętowej (Control Plane).
-GKE pozwala na dynamiczne skalowanie zasobów (w górę i do zera), co jest wykorzystywane w celu optymalizacji kosztów projektu.
+  GKE pozwala na dynamiczne skalowanie zasobów (w górę i do zera), co jest wykorzystywane w celu optymalizacji kosztów projektu.
 
 - **Zarządzanie tożsamością i dostępem (IAM)**: wykorzystane do bezpiecznego nadawania uprawnień dla serwera MCP, aby mógł on bezpiecznie komunikować się z API Grafany bez upubliczniania wrażliwych kluczy.
 
@@ -278,7 +278,7 @@ GKE pozwala na dynamiczne skalowanie zasobów (w górę i do zera), co jest wyko
 
 Bardzo ważnym czynnikiem jest również oferta bezpłatnych środków (300 USD) oferowanych przez Google dla nowych użytkowników w połączeniu z możliwościami GKE.
 Dzięki temu, że możemy "wyłączać" klaster kiedy nie jest on używany, przez ten czas nie są pobierane koszty.
-Pozwala to na zapewnienie działania klastra wtedy, kiedy jest to wymagane, przez cały czas trwania projektu, nie martwiąc się o przekroczenie limitów. 
+Pozwala to na zapewnienie działania klastra wtedy, kiedy jest to wymagane, przez cały czas trwania projektu, nie martwiąc się o przekroczenie limitów.
 
 ### Bank of Anthos jako referencyjne środowisko
 
@@ -402,24 +402,24 @@ kind: Config
 metadata:
   name: bank-of-anthos
 requires:
-- configs:
-  - accounts
-  path: src/accounts/skaffold.yaml
-- configs:
-  - ledger
-  path: src/ledger/skaffold.yaml
-- configs:
-  - frontend
-  path: src/frontend/skaffold.yaml
-- configs:
-  - loadgenerator
-  path: src/loadgenerator/skaffold.yaml
-- configs:
-  - accounts-db
-  path: src/accounts/accounts-db/skaffold.yaml
-- configs:
-  - ledger-db
-  path: src/ledger/ledger-db/skaffold.yaml
+  - configs:
+      - accounts
+    path: src/accounts/skaffold.yaml
+  - configs:
+      - ledger
+    path: src/ledger/skaffold.yaml
+  - configs:
+      - frontend
+    path: src/frontend/skaffold.yaml
+  - configs:
+      - loadgenerator
+    path: src/loadgenerator/skaffold.yaml
+  - configs:
+      - accounts-db
+    path: src/accounts/accounts-db/skaffold.yaml
+  - configs:
+      - ledger-db
+    path: src/ledger/ledger-db/skaffold.yaml
 deploy:
   tolerateFailuresUntilDeadline: true
 ```
@@ -619,57 +619,57 @@ metadata:
 #   release: monitoring
 spec:
   groups:
-  - name: Micro services uptime
-    interval: 60s
-    rules:
-    - alert: BalancereaderUnavaiable
-      expr: probe_success{app="bank-of-anthos",job="balancereader"} == 0
-      for: 1m
-      annotations:
-        summary: Balance Reader Service is unavailable
-        description: Check Balance Reader pods and it's logs
-      labels:
-        severity: 'critical'
-    - alert: ContactsUnavaiable
-      expr: probe_success{app="bank-of-anthos",job="contacts"} == 0
-      for: 1m
-      annotations:
-        summary: Contacs Service is unavailable
-        description: Check Contacs pods and it's logs
-      labels:
-        severity: 'warning'
-    - alert: FrontendUnavaiable
-      expr: probe_success{app="bank-of-anthos",job="frontend"} == 0
-      for: 1m
-      annotations:
-        summary: Frontend Service is unavailable
-        description: Check Frontend pods and it's logs
-      labels:
-        severity: 'critical'
-    - alert: LedgerwriterUnavaiable
-      expr: probe_success{app="bank-of-anthos",job="ledgerwriter"} == 0
-      for: 1m
-      annotations:
-        summary: Ledger Writer Service is unavailable
-        description: Check Ledger Writer pods and it's logs
-      labels:
-        severity: 'critical'
-    - alert: TransactionhistoryUnavaiable
-      expr: probe_success{app="bank-of-anthos",job="transactionhistory"} == 0
-      for: 1m
-      annotations:
-        summary: Transaction History Service is unavailable
-        description: Check Transaction History pods and it's logs
-      labels:
-        severity: 'critical'
-    - alert: UserserviceUnavaiable
-      expr: probe_success{app="bank-of-anthos",job="userservice"} == 0
-      for: 1m
-      annotations:
-        summary: User Service is unavailable
-        description: Check User Service pods and it's logs
-      labels:
-        severity: 'critical'
+    - name: Micro services uptime
+      interval: 60s
+      rules:
+        - alert: BalancereaderUnavaiable
+          expr: probe_success{app="bank-of-anthos",job="balancereader"} == 0
+          for: 1m
+          annotations:
+            summary: Balance Reader Service is unavailable
+            description: Check Balance Reader pods and it's logs
+          labels:
+            severity: "critical"
+        - alert: ContactsUnavaiable
+          expr: probe_success{app="bank-of-anthos",job="contacts"} == 0
+          for: 1m
+          annotations:
+            summary: Contacs Service is unavailable
+            description: Check Contacs pods and it's logs
+          labels:
+            severity: "warning"
+        - alert: FrontendUnavaiable
+          expr: probe_success{app="bank-of-anthos",job="frontend"} == 0
+          for: 1m
+          annotations:
+            summary: Frontend Service is unavailable
+            description: Check Frontend pods and it's logs
+          labels:
+            severity: "critical"
+        - alert: LedgerwriterUnavaiable
+          expr: probe_success{app="bank-of-anthos",job="ledgerwriter"} == 0
+          for: 1m
+          annotations:
+            summary: Ledger Writer Service is unavailable
+            description: Check Ledger Writer pods and it's logs
+          labels:
+            severity: "critical"
+        - alert: TransactionhistoryUnavaiable
+          expr: probe_success{app="bank-of-anthos",job="transactionhistory"} == 0
+          for: 1m
+          annotations:
+            summary: Transaction History Service is unavailable
+            description: Check Transaction History pods and it's logs
+          labels:
+            severity: "critical"
+        - alert: UserserviceUnavaiable
+          expr: probe_success{app="bank-of-anthos",job="userservice"} == 0
+          for: 1m
+          annotations:
+            summary: User Service is unavailable
+            description: Check User Service pods and it's logs
+          labels:
+            severity: "critical"
 ```
 
 Po odpowiednim przygotowaniu powyższych plików aplikujemy je:
@@ -702,14 +702,14 @@ Wyświetla on dostępność każdego z nich, czas odpowiedzi oraz zwracany kod H
   "timezone": "browser",
   "schemaVersion": 39,
   "refresh": "30s",
-  "time": {"from": "now-1h", "to": "now"},
+  "time": { "from": "now-1h", "to": "now" },
   "templating": {
     "list": [
       {
         "name": "datasource",
         "type": "datasource",
         "query": "prometheus",
-        "current": {"text": "Prometheus", "value": "Prometheus"},
+        "current": { "text": "Prometheus", "value": "Prometheus" },
         "hide": 0
       }
     ]
@@ -719,95 +719,143 @@ Wyświetla on dostępność każdego z nich, czas odpowiedzi oraz zwracany kod H
       "id": 1,
       "type": "stat",
       "title": "Service Up",
-      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 4},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "probe_success{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+        {
+          "expr": "probe_success{app=\"bank-of-anthos\"}",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
       ],
       "fieldConfig": {
         "defaults": {
           "mappings": [
-            {"type": "value", "options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}}}
+            {
+              "type": "value",
+              "options": {
+                "0": { "text": "DOWN", "color": "red" },
+                "1": { "text": "UP", "color": "green" }
+              }
+            }
           ],
-          "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]},
-          "color": {"mode": "thresholds"}
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" }
         }
       },
-      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "colorMode": "background", "graphMode": "none"}
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none"
+      }
     },
     {
       "id": 2,
       "type": "timeseries",
       "title": "Availability over time",
-      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "probe_success{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+        {
+          "expr": "probe_success{app=\"bank-of-anthos\"}",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
       ],
-      "fieldConfig": {"defaults": {"min": 0, "max": 1, "unit": "short"}}
+      "fieldConfig": { "defaults": { "min": 0, "max": 1, "unit": "short" } }
     },
     {
       "id": 3,
       "type": "timeseries",
       "title": "Probe latency",
-      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "probe_duration_seconds{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+        {
+          "expr": "probe_duration_seconds{app=\"bank-of-anthos\"}",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
       ],
-      "fieldConfig": {"defaults": {"unit": "s"}}
+      "fieldConfig": { "defaults": { "unit": "s" } }
     },
     {
       "id": 4,
       "type": "timeseries",
       "title": "HTTP status code per service",
-      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "probe_http_status_code{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+        {
+          "expr": "probe_http_status_code{app=\"bank-of-anthos\"}",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
       ]
     },
     {
       "id": 5,
       "type": "timeseries",
       "title": "DNS lookup time (probe)",
-      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "probe_dns_lookup_time_seconds{app=\"bank-of-anthos\"}", "legendFormat": "{{job}}", "refId": "A"}
+        {
+          "expr": "probe_dns_lookup_time_seconds{app=\"bank-of-anthos\"}",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        }
       ],
-      "fieldConfig": {"defaults": {"unit": "s"}}
+      "fieldConfig": { "defaults": { "unit": "s" } }
     },
     {
       "id": 6,
       "type": "timeseries",
       "title": "Pod CPU (default ns)",
-      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"default\", container!=\"\", container!=\"POD\"}[5m]))", "legendFormat": "{{pod}}", "refId": "A"}
+        {
+          "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"default\", container!=\"\", container!=\"POD\"}[5m]))",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
       ],
-      "fieldConfig": {"defaults": {"unit": "short"}}
+      "fieldConfig": { "defaults": { "unit": "short" } }
     },
     {
       "id": 7,
       "type": "timeseries",
       "title": "Pod memory (default ns)",
-      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"default\", container!=\"\", container!=\"POD\"})", "legendFormat": "{{pod}}", "refId": "A"}
+        {
+          "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"default\", container!=\"\", container!=\"POD\"})",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
       ],
-      "fieldConfig": {"defaults": {"unit": "bytes"}}
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
     },
     {
       "id": 8,
       "type": "timeseries",
       "title": "Pod restarts (default ns)",
-      "gridPos": {"x": 0, "y": 28, "w": 24, "h": 6},
-      "datasource": {"type": "prometheus", "uid": "${datasource}"},
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 6 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "targets": [
-        {"expr": "sum by (pod) (kube_pod_container_status_restarts_total{namespace=\"default\"})", "legendFormat": "{{pod}}", "refId": "A"}
+        {
+          "expr": "sum by (pod) (kube_pod_container_status_restarts_total{namespace=\"default\"})",
+          "legendFormat": "{{pod}}",
+          "refId": "A"
+        }
       ]
     }
   ]
@@ -861,14 +909,63 @@ Następnie należy otworzyć plik `claude_desktop_config.json` i dodać na końc
 }
 ```
 
-Po zrestartowaniu aplikacji Claude Desktop 
-wtyczka `grafana` powinna być domyślnie włączona.
+Po zrestartowaniu aplikacji Claude Desktop wtyczka `grafana` powinna być domyślnie włączona.
 
 ## Rozdział 8: Przedstawienie działania aplikacji
 
 ### Przebieg wykonania
 
+Po uruchomieniu aplikacji _Bank of Anthos_ w klastrze Kubernetes oraz skonfigurowaniu Prometheusa, Grafany i serwera MCP, przeprowadziliśmy demonstrację działania systemu w realnych scenariuszach testowych. Do interakcji z modelem językowym oraz serwerem MCP wykorzystana została aplikacja Claude Desktop z podłączoną wtyczką `grafana`.
+
+Dzięki udostępnieniu informacji z Grafany poprzez serwer MCP, możliwe jest odpytywanie Grafany o stan monitorowanych serwisów w języku naturalnym. W ramach przeprowadzonych demostracji model trafnie rozpoznawał intencje użytkownika, dobierał odpowiednie narzędzia udostępnione przez serwer MCP i zwracał wyniki w czytelnej formie adekwatnej dla danego zadania (zarówno tekstowej, jak i graficznej).
+
 ### Wyniki
+
+#### Scenariusz 1: Lista śledzonych serwisów
+
+Scenariusz ten miał na celu zweryfikowanie czy wszystkie serwisy postawione w klastrze Kubernetesa są widoczne oraz monitorowane przez Grafanę. W ramach tego eksperymentu użytkownik pyta LLMa o wszystkie dostępne w Grafanie serwisy.
+
+W celu sformułowania odpowiedzi model językowy wykorzystał dwa narzędzia MCP oraz zwrócił listę wszystkich serwisów widocznych obserwowanych w Prometheusie i dostępnych w Grafanie:
+
+- **Serwisy aplikacyjne:** `frontend`, `contacts`, `userservice`, `ledgerwriter`, `balancereader`, `transactionhistory`
+- **Infrastruktura Kubernetes:** `apiserver`, `kube-controller-manager`, `kube-scheduler`, `kube-proxy`, `kube-state-metrics`, `kubelet`, `coredns`
+- **Stos monitoringowy:** `monitoring-grafana`, `monitoring-kube-prometheus-prometheus`, `monitoring-kube-prometheus-operator`, `monitoring-kube-prometheus-alertmanager`, `node-exporter`
+
+Odpowiedź uzyskana w ramach zapytania była spójna ze stanem faktycznym.
+
+![alt text](images/mcp_list_services.png)
+
+#### Scenariusz 2: analiza zużycia pamięci przez `userservice`
+
+Scenariusz ten miał na celu sprawdzenie, czy model językowy jest w stanie pobrać dane telemetryczne dotyczące konkretnego serwisu i przedstawić je w czytelnej formie graficznej wraz z analizą. Użytkownik poprosił o wyrysowanie wykresu zużycia pamięci przez `userservice` z ostatniej godziny.
+
+Model odpytał Grafanę przez serwer MCP i wygenerował interaktywny wykres wraz ze statystykami podsumowującymi (wartość bieżąca, minimum, maksimum oraz zmiana względem początku okresu). Zaobserwowano następujące fazy:
+
+- **pierwsze ~12 minut:** wysoki poziom (~119 MB) z krótkim lokalnym maksimum wynoszącym 120,1 MB,
+- **kolejne ~18 minut:** wyraźny spadek z ~120 MB do ~113 MB, zinterpretowany przez model jako garbage collection uwalniający wcześniej zaalokowaną pamięć,
+- **po ~30 minucie:** stabilizacja na poziomie 112–113 MB bez dalszego wzrostu.
+
+Model ocenił stan serwisu jako prawidłowy — wcześniejszy wzrost zużycia pamięci został zniwelowany przez GC, a serwis utrzymuje się na stabilnym, niskim poziomie.
+
+![alt text](images/mcp_userservice_mem_usage.png)
+
+#### Scenariusz 3: analiza zasobów `frontend` z ostatnich 2 godzin
+
+Scenariusz ten miał na celu zweryfikowanie dwóch aspektów:
+
+- czy model językowy potrafi jednocześnie pobrać i zwizualizować kilka różnych rodzajów metryk dla tego samego serwisu,
+- czy model poprawnie uwzględnia przekazane przez użytkownika parametry (w tym przypadku było to podane przez użytkownika okno czasowe).
+
+Użytkownik zlecił jednoczesne wykreślenie zużycia pamięci oraz CPU przez serwis `frontend` z ostatnich 2 godzin.
+
+Model użył pięciu narzędzi MCP i wygenerował dwa oddzielne wykresy obejmujące przedział czasowy zgodnie z oknu obserwacji zgodnie z żądaniem użytkownika. Do wykresów dołączone zostały statystyki podsumowujące oraz analiza tekstowa:
+
+- **Pamięć:** stabilna w przedziale 87–93 MB, z krótkim spikiem do ~93 MB na początku okna obserwacji, następnie ustabilizowana na poziomie ~91 MB; brak trendu wzrostowego,
+- **CPU:** konsekwentnie niskie zużycie rzędu 4–5% rdzenia przez cały obserwowany okres; nieznaczny wzrost do ~5,3% w ostatnich ~20 minutach, oceniony przez model jako normalna zmienność ruchu.
+
+Model podsumował, że `frontend` działa stabilnie i mieści się w normalnych granicach operacyjnych. Scenariusz potwierdził zarówno zdolność modelu do jednoczesnej analizy wielu metryk i ich korelowania w ramach jednej spójnej odpowiedzi, jak i poprawne respektowanie parametru czasowego przekazanego w zapytaniu w języku naturalnym.
+
+![alt text](images/mcp_frontend_resources_usage.png)
 
 ## Rozdział 9: Podsumowanie i wnioski
 
