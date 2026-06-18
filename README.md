@@ -49,6 +49,9 @@
 8. [Przedstawienie działania aplikacji](#rozdział-8-przedstawienie-działania-aplikacji)
    1. [Przebieg wykonania](#przebieg-wykonania)
    2. [Wyniki](#wyniki)
+      1. [Scenariusz 1](#scenariusz-1-lista-śledzonych-serwisów)
+      2. [Scenariusz 2](#scenariusz-2-analiza-zużycia-pamięci-przez-userservice)
+      3. [Scenariusz 3](#scenariusz-3-analiza-zasobów-frontend-z-ostatnich-2-godzin)
 9. [Podsumowanie i wnioski](#rozdział-9-podsumowanie-i-wnioski)
 10. [Referencje](#rozdział-10-referencje)
 
@@ -931,7 +934,7 @@ Odpowiedź uzyskana w ramach zapytania była spójna ze stanem faktycznym.
 
 ![alt text](images/mcp_list_services.png)
 
-#### Scenariusz 2: analiza zużycia pamięci przez `userservice`
+#### Scenariusz 2: Analiza zużycia pamięci przez `userservice`
 
 Scenariusz ten miał na celu sprawdzenie, czy model językowy jest w stanie pobrać dane telemetryczne dotyczące konkretnego serwisu i przedstawić je w czytelnej formie graficznej wraz z analizą. Użytkownik poprosił o wyrysowanie wykresu zużycia pamięci przez `userservice` z ostatniej godziny.
 
@@ -945,7 +948,7 @@ Model ocenił stan serwisu jako prawidłowy — wcześniejszy wzrost zużycia pa
 
 ![alt text](images/mcp_userservice_mem_usage.png)
 
-#### Scenariusz 3: analiza zasobów `frontend` z ostatnich 2 godzin
+#### Scenariusz 3: Analiza zasobów `frontend` z ostatnich 2 godzin
 
 Scenariusz ten miał na celu zweryfikowanie dwóch aspektów:
 
@@ -954,7 +957,7 @@ Scenariusz ten miał na celu zweryfikowanie dwóch aspektów:
 
 Użytkownik zlecił jednoczesne wykreślenie zużycia pamięci oraz CPU przez serwis `frontend` z ostatnich 2 godzin.
 
-Model użył pięciu narzędzi MCP i wygenerował dwa oddzielne wykresy obejmujące przedział czasowy zgodnie z oknu obserwacji zgodnie z żądaniem użytkownika. Do wykresów dołączone zostały statystyki podsumowujące oraz analiza tekstowa:
+Model użył pięciu narzędzi MCP i wygenerował dwa oddzielne wykresy obejmujące przedział czasowy zgodny z żądaniem użytkownika. Do wykresów dołączone zostały statystyki podsumowujące oraz analiza tekstowa:
 
 - **Pamięć:** stabilna w przedziale 87–93 MB, z krótkim spikiem do ~93 MB na początku okna obserwacji, następnie ustabilizowana na poziomie ~91 MB; brak trendu wzrostowego,
 - **CPU:** konsekwentnie niskie zużycie rzędu 4–5% rdzenia przez cały obserwowany okres; nieznaczny wzrost do ~5,3% w ostatnich ~20 minutach, oceniony przez model jako normalna zmienność ruchu.
